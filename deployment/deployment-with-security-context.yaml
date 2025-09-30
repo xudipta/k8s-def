@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-with-security-context
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secure-app
+  template:
+    metadata:
+      labels:
+        app: secure-app
+    spec:
+      # Pod-level securityContext applies to all containers in the pod
+      securityContext:
+        runAsUser: 2000
+        runAsGroup: 4000
+        fsGroup: 3000
+      containers:
+      - name: secure-container
+        image: nginx:latest
+        # Specifies the security settings for the container, such as user ID, group ID, and privilege controls.
+        # This section helps define the container's access permissions and restrictions, enhancing the overall security posture.
+        # Common fields include 'runAsUser', 'runAsGroup', 'privileged', 'readOnlyRootFilesystem', and 'allowPrivilegeEscalation'.
+        # Adjust these settings according to your application's security requirements.
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 3000
+          fsGroup: 2000
+          allowPrivilegeEscalation: false
