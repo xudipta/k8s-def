@@ -14,7 +14,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.11.0
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@0.22.0
         with:
-          path: .
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
