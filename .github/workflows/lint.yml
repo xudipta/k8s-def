@@ -1,6 +1,6 @@
 ---
 name: Lint YAML files
-true:
+on:
   push:
     paths:
       - '**/*.yaml'
