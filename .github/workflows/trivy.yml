@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.14.0
+        uses: aquasecurity/setup-trivy@v0.2.4
         with:
           scan-type: 'fs'
           ignore-unfixed: true
