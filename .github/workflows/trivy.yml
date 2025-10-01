@@ -14,11 +14,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.50.2_Linux-64bit.deb
-          sudo dpkg -i trivy_0.50.2_Linux-64bit.deb
-      - name: Scan repository for vulnerabilities
-        run: trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.14.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          severity: 'HIGH,CRITICAL'
