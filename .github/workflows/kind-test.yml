@@ -1,0 +1,21 @@
+name: K8s Kind Test
+
+on: [push, pull_request]
+
+jobs:
+  k8s-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up kind cluster
+        uses: helm/kind-action@v1.9.0
+        with:
+          version: v0.20.0
+          wait: 60s
+      - name: Verify cluster
+        run: kubectl cluster-info
+      - name: Apply Pod manifest
+        run: kubectl apply -f pod/sample-pod.yaml
+      - name: Check pod status
+        run: kubectl get pods -o wide
