@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -8,7 +9,7 @@ spec:
     runAsGroup: 3000
     fsGroup: 2000
   containers:
-  - name: secure-container
-    image: nginx:latest
-    securityContext:
-      allowPrivilegeEscalation: false
+    - name: secure-container
+      image: nginx:latest
+      securityContext:
+        allowPrivilegeEscalation: false
