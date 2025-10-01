@@ -1,5 +1,5 @@
 
-YAML_FILES=$(shell find . -type f \( -name '*.yaml' -o -name '*.yml' \) ! -path './venv/*')
+YAML_FILES=$(shell find . -type f \( -name '*.yaml' -o -name '*.yml' \) ! -path './venv/*' ! -path './.github/*')
 
 .PHONY: lint format venv help
 
