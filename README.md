@@ -13,20 +13,6 @@ A quick reference repository for Kubernetes definition files. This repo organize
 - `configs/` — ConfigMap definitions
 - `secrets/` — Secret definitions
 
-Each folder contains sample YAML files to help you get started:
-
-- `pod/sample-pod.yaml`
-- `pod/pod-with-configmap-secret.yaml` (ConfigMap & Secret usage)
-- `pod/pod-with-security-context.yaml` (SecurityContext usage)
-- `deployment/sample-deployment.yaml`
-- `deployment/deployment-with-configmap-secret.yaml` (ConfigMap & Secret usage)
-- `deployment/deployment-with-security-context.yaml` (SecurityContext usage)
-- `replicaset/sample-replicaset.yaml`
-- `services/sample-service.yaml`
-- `configs/sample-configmap.yaml`
-- `secrets/sample-secret.yaml`
-
-
 ## Usage
 
 1. Browse the folders for sample YAML files.

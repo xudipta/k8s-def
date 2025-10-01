@@ -2,8 +2,15 @@
 
 This file provides useful `kubectl` commands for working with Kubernetes resources, including creating, editing, extracting, and redeploying definitions.
 
+
 ## Create Resources
 
+Create a new resource:
+```bash
+kubectl create -f <file>.yaml
+```
+
+Create or update a resource:
 ```bash
 kubectl apply -f <file>.yaml
 ```
