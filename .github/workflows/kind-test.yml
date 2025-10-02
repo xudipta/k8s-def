@@ -31,7 +31,7 @@ jobs:
 
       # Deploy Deployment that uses them
       - name: Apply Deployment
-        run: kubectl apply -f deployment/deployment-with-configmap-secret.yaml
+        run: kubectl apply -f deployment/
 
       # Wait for Pods to be ready
       - name: Wait for Pods
