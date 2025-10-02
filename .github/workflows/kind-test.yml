@@ -1,0 +1,48 @@
+name: Kind Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  k8s-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up kind cluster
+        uses: helm/kind-action@v1.9.0
+        with:
+          version: v0.20.0
+          wait: 60s
+      - name: Verify cluster
+        run: kubectl cluster-info
+      # Apply all Secrets
+      - name: Apply Secrets
+        run: kubectl apply -f secrets/
+
+      # Apply all ConfigMaps
+      - name: Apply ConfigMaps
+        run: kubectl apply -f configs/
+
+      # Deploy Deployment that uses them
+      - name: Apply Deployment
+        run: kubectl apply -f deployment/deployment-with-configmap-secret.yaml
+
+      # Wait for Pods to be ready
+      - name: Wait for Pods
+        run: kubectl wait --for=condition=available --timeout=60s deployment --all
+
+      # Verify all resources
+      - name: Check resources
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -o wide
+          echo "=== Secrets ==="
+          kubectl get secrets
+          echo "=== ConfigMaps ==="
+          kubectl get configmaps
