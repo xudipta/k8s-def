@@ -62,6 +62,6 @@ jobs:
       - name: Test Service connectivity
         run: |
           echo "Starting curl test pod..."
-          kubectl run curl --rm -i --restart=Never --image=curlimages/curl:latest -- \
-            sh -c "curl -s sample-service:80 | grep 'Welcome to nginx'"
+          kubectl run curl --restart=Never --rm -i --image=curlimages/curl:latest -- \
+            sh -c "set -e; RESPONSE=$(curl -s sample-service:80); echo \"\$RESPONSE\"; echo \"---\"; echo \"Verifying response...\"; echo \"\$RESPONSE\" | grep 'Welcome to nginx'"
 
