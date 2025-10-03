@@ -32,7 +32,7 @@ jobs:
       - name: Apply ConfigMaps
         run: kubectl apply -f configs/
 
-      # Apply Deployments
+      # Deploy Deployments
       - name: Apply Deployment
         run: kubectl apply -f deployment/
 
@@ -40,7 +40,7 @@ jobs:
       - name: Apply Services
         run: kubectl apply -f services/
 
-      # Wait for Pods to be ready
+      # Wait for all Deployments to be ready
       - name: Wait for Pods
         run: kubectl wait --for=condition=available --timeout=60s deployment --all
 
@@ -49,24 +49,36 @@ jobs:
         run: |
           echo "=== Pods ==="
           kubectl get pods -o wide
-          echo "=== Services ==="
-          kubectl get svc -o wide
           echo "=== Secrets ==="
           kubectl get secrets
           echo "=== ConfigMaps ==="
           kubectl get configmaps
+          echo "=== Services ==="
+          kubectl get svc -o wide
           echo "=== Endpoints ==="
           kubectl get endpoints
 
       # ✅ End-to-End Service Test
-      - name: Debug Service connectivity
+      - name: Test Service connectivity
         run: |
-          echo "Starting curl test pod for debugging..."
-          kubectl run curl --restart=Never --image=curlimages/curl:latest -- sleep 30 &
-          sleep 5
-          kubectl exec curl -- curl -v sample-service:80 || true
-          kubectl logs curl || true
-          kubectl describe svc sample-service
-          kubectl get endpoints sample-service
-          kubectl delete pod curl
+          echo "Testing service response..."
+          kubectl run curl --rm -i --restart=Never --image=curlimages/curl:latest -- \
+            sh -c "curl -s sample-service:80 | grep 'Welcome to nginx'"
 
+      # 🛠️ Debug if service test fails
+      - name: Debug on failure
+        if: failure()
+        run: |
+          echo "Service test failed ❌ - dumping debug info..."
+          echo "=== Pods (with status) ==="
+          kubectl get pods -o wide
+          echo "=== Pod Logs (nginx) ==="
+          kubectl logs -l app=nginx --tail=50 || true
+          echo "=== Services ==="
+          kubectl get svc -o wide
+          echo "=== Endpoints ==="
+          kubectl get endpoints
+          echo "=== Describe Deployment (nginx) ==="
+          kubectl describe deployment sample-deployment || true
+          echo "=== Describe Service ==="
+          kubectl describe svc sample-service || true
