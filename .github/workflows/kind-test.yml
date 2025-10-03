@@ -57,12 +57,11 @@ jobs:
           kubectl get configmaps
           echo "=== Endpoints ==="
           kubectl get endpoints
-          echo "=== Sample service endpoints ==="
-          kubectl get endpoints sample-service -o yaml || true
 
       # ✅ End-to-End Service Test
       - name: Test Service connectivity
         run: |
           echo "Starting curl test pod..."
           kubectl run curl --rm -i --restart=Never --image=curlimages/curl:latest -- \
-            curl -s sample-service:80
+            sh -c "curl -s sample-service:80 | grep 'Welcome to nginx'"
+
