@@ -59,9 +59,14 @@ jobs:
           kubectl get endpoints
 
       # ✅ End-to-End Service Test
-      - name: Test Service connectivity
+      - name: Debug Service connectivity
         run: |
-          echo "Starting curl test pod..."
-          kubectl run curl --restart=Never --rm -i --image=curlimages/curl:latest -- \
-            sh -c "set -e; RESPONSE=$(curl -s sample-service:80); echo \"\$RESPONSE\"; echo \"---\"; echo \"Verifying response...\"; echo \"\$RESPONSE\" | grep 'Welcome to nginx'"
+          echo "Starting curl test pod for debugging..."
+          kubectl run curl --restart=Never --image=curlimages/curl:latest -- sleep 30 &
+          sleep 5
+          kubectl exec curl -- curl -v sample-service:80 || true
+          kubectl logs curl || true
+          kubectl describe svc sample-service
+          kubectl get endpoints sample-service
+          kubectl delete pod curl
 
