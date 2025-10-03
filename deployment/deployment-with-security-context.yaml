@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,12 +15,11 @@ spec:
       securityContext:
         runAsUser: 2000
         runAsGroup: 4000
-        fsGroup: 3000
+        fsGroup: 3000   # ✅ fsGroup only allowed here
       containers:
         - name: secure-container
           image: nginx:latest
           securityContext:
             runAsUser: 1000
             runAsGroup: 3000
-            fsGroup: 2000
             allowPrivilegeEscalation: false
