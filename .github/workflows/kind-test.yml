@@ -14,13 +14,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up kind cluster
         uses: helm/kind-action@v1.9.0
         with:
           version: v0.20.0
           wait: 60s
+
       - name: Verify cluster
         run: kubectl cluster-info
+
       # Apply all Secrets
       - name: Apply Secrets
         run: kubectl apply -f secrets/
@@ -29,9 +32,13 @@ jobs:
       - name: Apply ConfigMaps
         run: kubectl apply -f configs/
 
-      # Deploy Deployment that uses them
+      # Apply Deployments
       - name: Apply Deployment
         run: kubectl apply -f deployment/
+
+      # Apply Services
+      - name: Apply Services
+        run: kubectl apply -f services/
 
       # Wait for Pods to be ready
       - name: Wait for Pods
@@ -42,7 +49,20 @@ jobs:
         run: |
           echo "=== Pods ==="
           kubectl get pods -o wide
+          echo "=== Services ==="
+          kubectl get svc -o wide
           echo "=== Secrets ==="
           kubectl get secrets
           echo "=== ConfigMaps ==="
           kubectl get configmaps
+          echo "=== Endpoints ==="
+          kubectl get endpoints
+          echo "=== Sample service endpoints ==="
+          kubectl get endpoints sample-service -o yaml || true
+
+      # ✅ End-to-End Service Test
+      - name: Test Service connectivity
+        run: |
+          echo "Starting curl test pod..."
+          kubectl run curl --rm -i --restart=Never --image=curlimages/curl:latest -- \
+            curl -s sample-service:80
