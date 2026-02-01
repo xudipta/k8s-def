@@ -1,0 +1,12 @@
+# All YAML files require your review
+*.yaml       @xudipta
+
+# Deployment folder changes require @xudipta
+/deployment/ @xudipta
+
+# Configs and secrets require both you and @colleague
+/configs/ @xudipta
+/secrets/ @xudipta
+
+# README and docs
+README.md    @xudipta
