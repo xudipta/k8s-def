@@ -1,0 +1,85 @@
+site_name: cookbook
+site_description: >-
+  CI-validated notes and runnable examples for infrastructure and AI tooling.
+site_url: https://xudipta.github.io/cookbook/
+repo_url: https://github.com/xudipta/cookbook
+repo_name: xudipta/cookbook
+edit_uri: edit/main/
+
+# site-src/ is assembled from the repo by scripts/build_docs.sh (topic notes
+# live under topics/<topic>/, not in a single docs tree).
+docs_dir: site-src
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+
+plugins:
+  - search
+
+nav:
+  - Home: README.md
+  - Contributing: CONTRIBUTING.md
+  - Kubernetes:
+      - Overview: topics/kubernetes/README.md
+      - kubectl commands: topics/kubernetes/notes/kubectl-commands.md
+  - Docker:
+      - Overview: topics/docker/README.md
+      - Getting started: topics/docker/notes/00-getting-started.md
+  - Linux:
+      - Overview: topics/linux/README.md
+      - Getting started: topics/linux/notes/00-getting-started.md
+  - Terraform:
+      - Overview: topics/terraform/README.md
+      - Getting started: topics/terraform/notes/00-getting-started.md
+  - CI/CD:
+      - Overview: topics/cicd/README.md
+      - Getting started: topics/cicd/notes/00-getting-started.md
+  - Agent Skills:
+      - Overview: topics/skills/README.md
+      - What are Agent Skills: topics/skills/notes/01-what-are-agent-skills.md
+      - Authoring a skill: topics/skills/notes/02-authoring-skills.md
+      - Skills in Claude Code: topics/skills/notes/03-skills-in-claude-code.md
+  - MCP:
+      - Overview: topics/mcp/README.md
+      - Protocol overview: topics/mcp/notes/01-mcp-overview.md
+      - MCP in Claude Code: topics/mcp/notes/02-mcp-in-claude-code.md
+      - Building a server: topics/mcp/notes/03-building-a-server.md

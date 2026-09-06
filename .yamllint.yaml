@@ -10,3 +10,5 @@ ignore: |
   .github/workflows/*.yml
   topics/cicd/examples/workflows/*.yml
   topics/terraform/**/.terraform/
+  mkdocs.yml
+  site-src/
