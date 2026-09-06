@@ -1,0 +1,27 @@
+---
+# Relaxed markdownlint rules for prose-heavy notes.
+default: true
+
+# Line length: notes wrap naturally, don't enforce.
+MD013: false
+
+# Allow multiple consecutive blank lines (1 max is too strict for notes).
+MD012:
+  maximum: 2
+
+# Allow inline HTML (used occasionally in notes).
+MD033: false
+
+# Allow duplicate headings in different sections (e.g. repeated "Usage").
+MD024:
+  siblings_only: true
+
+# First line doesn't have to be a top-level heading.
+MD041: false
+
+# Nested bullets under an ordered step align to the parent text (3 spaces).
+MD007: false
+
+# Don't require blank lines around fenced blocks inside list items.
+MD031:
+  list_items: false
