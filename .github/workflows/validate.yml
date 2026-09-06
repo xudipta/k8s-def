@@ -1,0 +1,204 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      md: ${{ steps.filter.outputs.md }}
+      yaml: ${{ steps.filter.outputs.yaml }}
+      k8s: ${{ steps.filter.outputs.k8s }}
+      docker: ${{ steps.filter.outputs.docker }}
+      shell: ${{ steps.filter.outputs.shell }}
+      terraform: ${{ steps.filter.outputs.terraform }}
+      cicd: ${{ steps.filter.outputs.cicd }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            md:
+              - '**/*.md'
+            yaml:
+              - '**/*.yaml'
+              - '**/*.yml'
+              - '.yamllint.yaml'
+            k8s:
+              - 'topics/kubernetes/**'
+            docker:
+              - 'topics/docker/**'
+            shell:
+              - '**/*.sh'
+            terraform:
+              - 'topics/terraform/**'
+            cicd:
+              - 'topics/cicd/**'
+
+  markdownlint:
+    needs: changes
+    if: needs.changes.outputs.md == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          config: .markdownlint.yaml
+          globs: '**/*.md'
+
+  yamllint:
+    needs: changes
+    if: needs.changes.outputs.yaml == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install yamllint
+      - run: yamllint .
+
+  k8s-validate:
+    needs: changes
+    if: needs.changes.outputs.k8s == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubeconform
+        run: |
+          curl -sSLo kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform.tar.gz kubeconform
+          sudo install kubeconform /usr/local/bin/
+      - name: Schema-validate manifests
+        run: |
+          kubeconform -summary -strict -verbose \
+            -schema-location default \
+            topics/kubernetes/examples/
+
+  k8s-kind:
+    needs: changes
+    if: needs.changes.outputs.k8s == 'true'
+    runs-on: ubuntu-latest
+    env:
+      K8S_EXAMPLES: topics/kubernetes/examples
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kind cluster
+        uses: helm/kind-action@v1.9.0
+        with:
+          version: v0.20.0
+          wait: 60s
+
+      - name: Verify cluster
+        run: kubectl cluster-info
+
+      - name: Apply Secrets
+        run: kubectl apply -f "$K8S_EXAMPLES/secrets/"
+
+      - name: Apply ConfigMaps
+        run: kubectl apply -f "$K8S_EXAMPLES/configs/"
+
+      - name: Apply Deployments
+        run: kubectl apply -f "$K8S_EXAMPLES/deployment/"
+
+      - name: Apply Services
+        run: kubectl apply -f "$K8S_EXAMPLES/services/"
+
+      - name: Wait for Deployments
+        run: kubectl wait --for=condition=available --timeout=60s deployment --all
+
+      - name: Check resources
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -o wide
+          echo "=== Secrets ==="
+          kubectl get secrets
+          echo "=== ConfigMaps ==="
+          kubectl get configmaps
+          echo "=== Services ==="
+          kubectl get svc -o wide
+          echo "=== Endpoints ==="
+          kubectl get endpoints
+
+      - name: Test Service connectivity
+        run: |
+          echo "Testing service response..."
+          kubectl run curl --rm -i --restart=Never --image=curlimages/curl:latest -- \
+            sh -c "curl -s sample-service:80 | grep 'Welcome to nginx'"
+
+      - name: Debug on failure
+        if: failure()
+        run: |
+          echo "Service test failed - dumping debug info..."
+          kubectl get pods -o wide
+          kubectl logs -l app=nginx --tail=50 || true
+          kubectl get svc -o wide
+          kubectl get endpoints
+          kubectl describe deployment sample-deployment || true
+          kubectl describe svc sample-service || true
+
+  docker-lint:
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+          dockerfile: 'topics/docker/**/Dockerfile*'
+
+  shell-lint:
+    needs: changes
+    if: needs.changes.outputs.shell == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        run: |
+          mapfile -t files < <(find topics scripts -type f -name '*.sh')
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          printf '%s\n' "${files[@]}"
+          shellcheck "${files[@]}"
+
+  terraform-validate:
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: terraform fmt
+        run: terraform fmt -check -recursive topics/terraform
+      - uses: terraform-linters/setup-tflint@v4
+      - name: tflint
+        working-directory: topics/terraform
+        run: tflint --recursive
+
+  actionlint:
+    needs: changes
+    if: needs.changes.outputs.cicd == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run actionlint
+        run: |
+          bash <(curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color topics/cicd/examples/workflows/*.yml

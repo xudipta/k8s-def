@@ -1,0 +1,29 @@
+name: Reusable lint
+
+# Example reusable workflow: call it from another workflow with
+#   jobs:
+#     lint:
+#       uses: ./.github/workflows/reusable-lint.yml
+#       with:
+#         paths: "."
+
+on:
+  workflow_call:
+    inputs:
+      paths:
+        description: Path passed to yamllint
+        type: string
+        default: "."
+
+jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install yamllint
+      - env:
+          PATHS: ${{ inputs.paths }}
+        run: yamllint "$PATHS"

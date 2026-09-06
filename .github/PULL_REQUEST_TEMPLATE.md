@@ -1,14 +1,23 @@
-# 🥄 Quick Kube-Cookbook PR
+# Cookbook PR
 
 ## Title
-Give your PR a short, clear title.
 
-## What’s Cooking? (Changes)
-- e.g., Added/Updated/Fixed a YAML, ConfigMap, Secret, or Service
+Short, clear title.
 
-## Why? (Motivation)
-- One line on why this change is needed
+## Topic
 
-## Tested?
-- [ ] Applied in cluster
-- [ ] Verified pods/services
+<!-- kubernetes / docker / linux / terraform / cicd / new topic: ___ -->
+
+## What changed
+
+- e.g. Added a note, updated a manifest, added an example
+
+## Why
+
+- One line on why this is needed
+
+## Validation
+
+- [ ] Relevant local check passes (see `CONTRIBUTING.md`)
+- [ ] Covered by a CI validator (which one? ___)
+- [ ] New topic: validator wired into `.github/workflows/validate.yml`

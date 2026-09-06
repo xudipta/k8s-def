@@ -1,12 +1,12 @@
-# All YAML files require your review
-*.yaml       @xudipta
+# Default owner for everything
+*               @xudipta
 
-# Deployment folder changes require @xudipta
-/deployment/ @xudipta
+# All topic content
+/topics/        @xudipta
 
-# Configs and secrets require both you and @colleague
-/configs/ @xudipta
-/secrets/ @xudipta
+# CI, templates, ownership
+/.github/       @xudipta
 
-# README and docs
-README.md    @xudipta
+# Repo docs
+README.md       @xudipta
+CONTRIBUTING.md @xudipta

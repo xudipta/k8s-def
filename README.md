@@ -1,57 +1,46 @@
-# k8s-def
-## k8s-def
+# cookbook
 
-A quick reference repository for Kubernetes definition files. This repo organizes common Kubernetes resources into separate folders for easy access and sharing.
+A personal cookbook of notes and runnable examples across infrastructure and tooling
+topics. Every topic that lives here is **validated in CI** — notes are linted, examples are
+schema-checked or smoke-tested — so nothing rots silently.
 
+## Topics
 
-## Structure
+| Topic | Path | What's validated |
+| --- | --- | --- |
+| Kubernetes | [`topics/kubernetes/`](topics/kubernetes/) | `yamllint`, `kubeconform`, `kind` deploy + Service curl test |
+| Docker / Containers | [`topics/docker/`](topics/docker/) | `hadolint` on every `Dockerfile` |
+| Linux / Shell | [`topics/linux/`](topics/linux/) | `shellcheck` on every `*.sh` |
+| Terraform / IaC | [`topics/terraform/`](topics/terraform/) | `terraform fmt -check`, `tflint` |
+| CI/CD & Git | [`topics/cicd/`](topics/cicd/) | `actionlint` on example workflows |
 
-- `pod/` — Pod definitions
-- `deployment/` — Deployment definitions
-- `replicaset/` — ReplicaSet definitions
-- `services/` — Service definitions
-- `configs/` — ConfigMap definitions
-- `secrets/` — Secret definitions
+Markdown across the whole repo is checked with `markdownlint`.
 
-## Usage
+## Layout
 
-1. Browse the folders for sample YAML files.
-2. Copy and modify the files as needed for your own Kubernetes resources.
-3. Apply files using `kubectl apply -f <file>`.
-
-## Examples
-
-Apply a Pod definition:
-```bash
-kubectl apply -f pod/sample-pod.yaml
+```text
+topics/<topic>/
+  README.md              # what the topic covers + how it's validated
+  notes/NN-*.md          # prose notes
+  examples/<name>/       # runnable files (manifests, Dockerfiles, scripts, .tf, ...)
 ```
 
-Apply a Deployment with ConfigMap and Secret:
+## How validation works
+
+A single workflow, [`.github/workflows/validate.yml`](.github/workflows/validate.yml), runs
+on every push and PR to `main`. A `changes` job detects which topics/file types were
+touched and runs only the relevant validators, so a docs-only change doesn't spin up a
+`kind` cluster. `trivy.yml` additionally scans the repo for known vulnerabilities.
+
+## Local checks
+
 ```bash
-kubectl apply -f deployment/deployment-with-configmap-secret.yaml
+make venv     # one-time: create ./venv with yamllint
+make lint     # yamllint all YAML
+make lint-md  # markdownlint all Markdown (needs npx)
+make format   # normalise YAML formatting
 ```
 
-Apply a Pod with SecurityContext:
-```bash
-kubectl apply -f pod/pod-with-security-context.yaml
-```
+## Adding a topic
 
-Apply a Deployment with SecurityContext:
-```bash
-kubectl apply -f deployment/deployment-with-security-context.yaml
-```
-
-## SecurityContext Usage
-
-You can use `securityContext` in both Pods and Deployments:
-
-- **Pod-level securityContext**: Set under `spec.securityContext` (applies to all containers in the Pod).
-- **Container-level securityContext**: Set under `spec.containers[].securityContext` (applies only to the specific container).
-
-See the example files for both usages.
-
-## ConfigMap and Secret Usage
-
-ConfigMaps and Secrets can be injected into Pods and Deployments as environment variables or mounted as volumes. Example files demonstrate both approaches.
-
-Feel free to add more examples or customize the files for your use case.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
