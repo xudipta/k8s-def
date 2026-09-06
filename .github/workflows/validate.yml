@@ -24,6 +24,7 @@ jobs:
       cicd: ${{ steps.filter.outputs.cicd }}
       skills: ${{ steps.filter.outputs.skills }}
       mcp: ${{ steps.filter.outputs.mcp }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -51,6 +52,11 @@ jobs:
               - 'scripts/check_skill.py'
             mcp:
               - 'topics/mcp/**'
+            docs:
+              - '**/*.md'
+              - 'mkdocs.yml'
+              - 'requirements-docs.txt'
+              - 'scripts/build_docs.sh'
 
   markdownlint:
     needs: changes
@@ -246,3 +252,19 @@ jobs:
             echo "checking $f"
             jq empty "$f"
           done
+
+  docs-build:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    env:
+      DISABLE_MKDOCS_2_WARNING: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install -r requirements-docs.txt
+      - run: bash scripts/build_docs.sh
+      - name: Build site (strict)
+        run: mkdocs build --strict --site-dir _site
