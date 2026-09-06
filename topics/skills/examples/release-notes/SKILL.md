@@ -1,0 +1,29 @@
+---
+name: release-notes
+description: >-
+  Generate release notes from merged pull requests since the last git tag. Use when the
+  user asks for a changelog, release notes, or "what changed since <version>".
+license: MIT
+allowed-tools: [Bash, Read]
+---
+
+# Release notes
+
+Turn merged PRs since the last release into grouped, human-readable notes.
+
+## Steps
+
+1. Run `scripts/collect_prs.sh [<since-tag>]` to get the raw list of merged PRs
+   (title, number, labels, author) since the last tag, as JSON on stdout.
+   If the repo has no tags, the script falls back to the first commit.
+2. Group entries by type, inferred from the conventional-commit prefix in the title
+   or from labels: **Features**, **Fixes**, **Docs**, **Internal**.
+3. For each entry write: `- <imperative summary> (#<number>)`. Rewrite terse titles
+   into a readable sentence; drop pure chore/CI entries from user-facing sections.
+4. Emit Markdown with an `## <next version>` heading. Ask the user for the version
+   string if it is not obvious from the tags.
+5. Show the draft and ask before writing it to `CHANGELOG.md`.
+
+## Files
+
+- `scripts/collect_prs.sh` — gathers merged PRs via the `gh` CLI. Read it before running.

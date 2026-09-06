@@ -22,6 +22,8 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
       terraform: ${{ steps.filter.outputs.terraform }}
       cicd: ${{ steps.filter.outputs.cicd }}
+      skills: ${{ steps.filter.outputs.skills }}
+      mcp: ${{ steps.filter.outputs.mcp }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -44,6 +46,11 @@ jobs:
               - 'topics/terraform/**'
             cicd:
               - 'topics/cicd/**'
+            skills:
+              - 'topics/skills/**'
+              - 'scripts/check_skill.py'
+            mcp:
+              - 'topics/mcp/**'
 
   markdownlint:
     needs: changes
@@ -202,3 +209,40 @@ jobs:
         run: |
           bash <(curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
           ./actionlint -color topics/cicd/examples/workflows/*.yml
+
+  skills-validate:
+    needs: changes
+    if: needs.changes.outputs.skills == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install pyyaml
+      - name: Validate SKILL.md files
+        run: |
+          mapfile -t files < <(find topics -type f -name 'SKILL.md')
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No SKILL.md files found."
+            exit 0
+          fi
+          python scripts/check_skill.py "${files[@]}"
+
+  mcp-validate:
+    needs: changes
+    if: needs.changes.outputs.mcp == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON config examples
+        run: |
+          mapfile -t files < <(find topics/mcp/examples -type f \( -name '*.json' -o -name '.mcp.json' \))
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No JSON files found."
+            exit 0
+          fi
+          for f in "${files[@]}"; do
+            echo "checking $f"
+            jq empty "$f"
+          done

@@ -1,0 +1,13 @@
+{
+  "//": "Example claude_desktop_config.json — stdio servers only.",
+  "mcpServers": {
+    "sqlite": {
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "/absolute/path/to/app.db"]
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    }
+  }
+}
