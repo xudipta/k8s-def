@@ -13,6 +13,8 @@ schema-checked or smoke-tested — so nothing rots silently.
 | Linux / Shell | [`topics/linux/`](topics/linux/) | `shellcheck` on every `*.sh` |
 | Terraform / IaC | [`topics/terraform/`](topics/terraform/) | `terraform fmt -check`, `tflint` |
 | CI/CD & Git | [`topics/cicd/`](topics/cicd/) | `actionlint` on example workflows |
+| Agent Skills | [`topics/skills/`](topics/skills/) | `scripts/check_skill.py` on every `SKILL.md` |
+| MCP | [`topics/mcp/`](topics/mcp/) | `jq` syntax check on example configs |
 
 Markdown across the whole repo is checked with `markdownlint`.
 

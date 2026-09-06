@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "grafana": {
+      "type": "http",
+      "url": "https://grafana.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GRAFANA_TOKEN}"
+      }
+    }
+  }
+}
