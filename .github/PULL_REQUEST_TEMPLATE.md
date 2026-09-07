@@ -6,7 +6,7 @@ Short, clear title.
 
 ## Topic
 
-<!-- kubernetes / docker / linux / terraform / cicd / new topic: ___ -->
+<!-- kubernetes / docker / linux / terraform / cicd / github / skills / mcp / new topic: ___ -->
 
 ## What changed
 

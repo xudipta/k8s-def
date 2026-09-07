@@ -80,7 +80,11 @@ nav:
       - Overview: topics/cicd/README.md
       - GitHub Actions basics: topics/cicd/notes/01-github-actions-basics.md
       - Workflow patterns: topics/cicd/notes/02-workflow-patterns.md
-      - Git workflow: topics/cicd/notes/03-git-workflow.md
+  - GitHub:
+      - Overview: topics/github/README.md
+      - Git fundamentals: topics/github/notes/01-git-fundamentals.md
+      - GitHub CLI and PRs: topics/github/notes/02-github-cli-and-prs.md
+      - Repo configuration: topics/github/notes/03-repo-configuration.md
   - Agent Skills:
       - Overview: topics/skills/README.md
       - What are Agent Skills: topics/skills/notes/01-what-are-agent-skills.md
