@@ -60,7 +60,11 @@ nav:
   - Contributing: CONTRIBUTING.md
   - Kubernetes:
       - Overview: topics/kubernetes/README.md
-      - kubectl commands: topics/kubernetes/notes/kubectl-commands.md
+      - kubectl commands: topics/kubernetes/notes/01-kubectl-commands.md
+      - Pods and workloads: topics/kubernetes/notes/02-pods-and-workloads.md
+      - Config and secrets: topics/kubernetes/notes/03-config-and-secrets.md
+      - Services and networking: topics/kubernetes/notes/04-services-and-networking.md
+      - SecurityContext: topics/kubernetes/notes/05-security-context.md
   - Docker:
       - Overview: topics/docker/README.md
       - Images and Dockerfiles: topics/docker/notes/01-images-and-dockerfiles.md

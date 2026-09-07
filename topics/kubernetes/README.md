@@ -1,16 +1,30 @@
 # Kubernetes
 
-A quick reference for Kubernetes definition files and `kubectl` usage.
+Notes and example manifests for core Kubernetes objects and `kubectl` usage.
 
 ## Contents
 
-- `notes/kubectl-commands.md` — common `kubectl` commands (create, edit, extract, redeploy).
+- `notes/01-kubectl-commands.md` — create/apply/edit/extract, inspecting and debugging
+  with `describe`/`logs`/`exec`, scaling and rollouts, port-forwarding, namespaces.
+- `notes/02-pods-and-workloads.md` — Pods vs. ReplicaSets vs. Deployments, how labels and
+  selectors tie them together, walking through `examples/pod/`, `examples/replicaset/`,
+  and `examples/deployment/sample-deployment.yaml`.
+- `notes/03-config-and-secrets.md` — ConfigMap vs. Secret, env vars vs. volume mounts,
+  walking through `examples/configs/`, `examples/secrets/`, and the
+  `*-with-configmap-secret.yaml` examples.
+- `notes/04-services-and-networking.md` — Service types, selectors/endpoints, cluster
+  DNS, walking through `examples/services/sample-service.yaml`; Ingress, briefly.
+- `notes/05-security-context.md` — Pod- vs. container-level `securityContext`, the fields
+  that matter, walking through the `*-with-security-context.yaml` examples.
 - `examples/pod/` — Pod definitions.
 - `examples/deployment/` — Deployment definitions.
 - `examples/replicaset/` — ReplicaSet definitions.
 - `examples/services/` — Service definitions.
 - `examples/configs/` — ConfigMap definitions.
 - `examples/secrets/` — Secret definitions.
+
+New here? Start with `notes/01-kubectl-commands.md`, then `notes/02-pods-and-workloads.md`
+alongside `examples/pod/sample-pod.yaml`.
 
 ## Usage
 
@@ -28,14 +42,14 @@ kubectl apply -f examples/deployment/deployment-with-security-context.yaml
 - **Pod-level** (`spec.securityContext`) — applies to all containers in the Pod.
 - **Container-level** (`spec.containers[].securityContext`) — applies to that container only.
 
-See `examples/pod/pod-with-security-context.yaml` and
+See `notes/05-security-context.md`, `examples/pod/pod-with-security-context.yaml`, and
 `examples/deployment/deployment-with-security-context.yaml`.
 
 ## ConfigMaps and Secrets
 
 ConfigMaps and Secrets can be injected as environment variables or mounted as volumes.
-`examples/pod/pod-with-configmap-secret.yaml` and
-`examples/deployment/deployment-with-configmap-secret.yaml` demonstrate both.
+See `notes/03-config-and-secrets.md`, `examples/pod/pod-with-configmap-secret.yaml`, and
+`examples/deployment/deployment-with-configmap-secret.yaml`.
 
 ## Validation
 
