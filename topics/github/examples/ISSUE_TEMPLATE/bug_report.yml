@@ -1,0 +1,38 @@
+---
+name: Bug report
+description: Something isn't working as expected
+title: "bug: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug — the more detail below, the faster it can be fixed.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version/commit are you on?
+      placeholder: "v1.2.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: What did you do, and what happened instead of what you expected?
+      placeholder: |
+        1. Run `...`
+        2. Observe `...`
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low — cosmetic, has a workaround
+        - Medium — impacts a workflow, no easy workaround
+        - High — data loss, security, or blocks core usage
+    validations:
+      required: true

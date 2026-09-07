@@ -14,7 +14,8 @@ schema-checked or smoke-tested — so nothing rots silently.
 | Docker / Containers | [`topics/docker/`](topics/docker/README.md) | `hadolint` on every `Dockerfile` |
 | Linux / Shell | [`topics/linux/`](topics/linux/README.md) | `shellcheck` on every `*.sh` |
 | Terraform / IaC | [`topics/terraform/`](topics/terraform/README.md) | `terraform fmt -check`, `tflint` |
-| CI/CD & Git | [`topics/cicd/`](topics/cicd/README.md) | `actionlint` on example workflows |
+| CI/CD | [`topics/cicd/`](topics/cicd/README.md) | `actionlint` on example workflows |
+| GitHub / Git | [`topics/github/`](topics/github/README.md) | `yamllint` on the issue form, `shellcheck` on the `gh` script |
 | Agent Skills | [`topics/skills/`](topics/skills/README.md) | `scripts/check_skill.py` on every `SKILL.md` |
 | MCP | [`topics/mcp/`](topics/mcp/README.md) | `jq` syntax check on example configs |
 

@@ -44,6 +44,7 @@ Terraform examples use the `local`/`random`/`null` providers, not real clouds).
 | linux | shellcheck | `shellcheck topics/linux/examples/scripts/*.sh` |
 | terraform | terraform / tflint | `terraform fmt -check -recursive topics/terraform && tflint --recursive` |
 | cicd | actionlint | `actionlint topics/cicd/examples/workflows/*.yml` |
+| github | shellcheck / yamllint | `shellcheck topics/github/examples/scripts/*.sh && yamllint topics/github/examples/ISSUE_TEMPLATE/*.yml` |
 | skills | check_skill.py | `python scripts/check_skill.py topics/skills/examples/*/SKILL.md` |
 | mcp | jq | `find topics/mcp/examples -name '*.json' -o -name '.mcp.json' \| xargs -n1 jq empty` |
 

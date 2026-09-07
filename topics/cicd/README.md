@@ -1,6 +1,9 @@
-# CI/CD & Git
+# CI/CD
 
-Notes on pipelines, GitHub Actions, and git workflows, plus reusable workflow examples.
+Notes on pipelines and GitHub Actions, plus reusable workflow examples.
+
+For git itself and GitHub-the-platform (the `gh` CLI, PRs, repo configuration), see
+[`topics/github/`](../github/README.md).
 
 ## Contents
 
@@ -8,8 +11,6 @@ Notes on pipelines, GitHub Actions, and git workflows, plus reusable workflow ex
   permissions, walking through `examples/workflows/reusable-lint.yml`, security basics.
 - `notes/02-workflow-patterns.md` — path filtering, dependency caching, matrix builds,
   reusable workflows vs. composite actions.
-- `notes/03-git-workflow.md` — branch/rebase/merge, undoing changes safely, commit and PR
-  conventions, tag-based releases.
 - `examples/workflows/` — example workflow files.
 
 New here? Start with `notes/01-github-actions-basics.md` and read it alongside
