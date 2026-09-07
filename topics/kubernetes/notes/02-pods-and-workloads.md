@@ -71,4 +71,4 @@ relationship: **Deployment → owns a ReplicaSet → owns Pods**.
 labels` — this is how the controller finds "its" Pods among everything else in the
 namespace. The same label (`app: nginx` in these examples) is also what
 `examples/services/sample-service.yaml`'s `spec.selector` matches on — see
-`03-services-and-networking.md`.
+`04-services-and-networking.md`.

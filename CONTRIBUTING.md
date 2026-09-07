@@ -14,7 +14,7 @@
    topics/<topic>/
      README.md              # copy the shape of an existing topic README:
                             #   what it covers + a "Validation" section
-     notes/00-getting-started.md
+     notes/01-<short-title>.md
      examples/               # at least one real, minimal example
    ```
 
