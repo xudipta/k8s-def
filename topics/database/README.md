@@ -3,6 +3,19 @@
 Notes and examples for relational schema design, migrations, and querying — provider-
 agnostic SQL, Postgres dialect in the examples.
 
+## What holds the data
+
+```mermaid
+flowchart LR
+    App["your app"] -->|SQL query| Engine["database engine\n(Postgres, ...)"]
+    Engine -->|reads/writes| Tables[("tables\n— the schema")]
+    Migrations["numbered migration files"] -->|evolve, in order| Tables
+```
+
+The schema is never edited by hand once it's live — it only changes through migrations
+applied in order, so every environment (your laptop, CI, production) can reach the exact
+same schema by replaying the same files. See `02-migrations.md`.
+
 ## Contents
 
 - `notes/01-schema-design-and-normalization.md` — 1NF/2NF/3NF, foreign keys and
@@ -19,21 +32,27 @@ agnostic SQL, Postgres dialect in the examples.
 New here? Start with `notes/01-schema-design-and-normalization.md` alongside
 `examples/schema/schema.sql`.
 
-## Validation
+## Quickstart
 
-- `sqlfluff lint` (Postgres dialect, configured in `.sqlfluff`) covers every `*.sql`
-  file under `examples/`.
-- A live check runs `examples/schema/schema.sql` and, separately, every migration pair
-  against a real `postgres:16-alpine` service container: `schema.sql` applies cleanly;
-  all four `up` migrations apply in order and produce exactly the same 4 tables; all four
-  `down` migrations then apply in reverse order and leave the schema empty.
+Needs any running Postgres (`docker run -e POSTGRES_PASSWORD=x -p 5432:5432
+postgres:16-alpine` for a disposable local one):
 
 ```bash
-sqlfluff lint topics/database/examples/
+sqlfluff lint topics/database/examples/           # static check, no database needed
 
-# against a running Postgres:
 psql -f topics/database/examples/schema/schema.sql
+psql -c '\dt'                                      # -> users, products, orders, order_items
+
 psql -c 'DROP TABLE IF EXISTS order_items, orders, products, users CASCADE;'
 for f in $(ls topics/database/examples/migrations/*.up.sql | sort); do psql -f "$f"; done
+psql -c '\dt'                                      # same 4 tables, built up incrementally
 for f in $(ls topics/database/examples/migrations/*.down.sql | sort -r); do psql -f "$f"; done
+psql -c '\dt'                                      # -> empty again
 ```
+
+## Validation
+
+- `sqlfluff lint` (the command above, Postgres dialect configured in `.sqlfluff`) covers
+  every `*.sql` file under `examples/`.
+- A live check runs the exact Postgres sequence above against a real
+  `postgres:16-alpine` service container in CI.

@@ -2,6 +2,22 @@
 
 Infrastructure-as-code notes and self-contained examples.
 
+## What Terraform actually does
+
+```mermaid
+flowchart LR
+    HCL["*.tf config\n(desired state)"] --> Plan{{"terraform plan"}}
+    State[("state file\ntracked resources")] --> Plan
+    Real["real infrastructure"] -.->|refresh| Plan
+    Plan -->|diff: + create ~ update - destroy| Apply{{"terraform apply"}}
+    Apply --> Real
+    Apply --> State
+```
+
+`plan` is the whole point: it diffs your config against the state file (which itself
+gets refreshed against real infrastructure first) and shows exactly what `apply` would
+change, before anything happens.
+
 ## Contents
 
 - `notes/01-core-workflow.md` — `init`/`plan`/`apply`/`destroy`, reading a plan, how state
@@ -14,6 +30,18 @@ Infrastructure-as-code notes and self-contained examples.
 New to Terraform? Start with `notes/01-core-workflow.md` and run `examples/local-file`
 alongside it.
 
+## Quickstart
+
+```bash
+cd examples/local-file
+terraform init
+terraform apply -auto-approve
+cat greeting.txt                     # -> hello from the cookbook
+terraform apply -auto-approve -var 'greeting=hi there'   # re-plan: ~ update in place
+cat greeting.txt                     # -> hi there
+terraform destroy -auto-approve
+```
+
 ## Validation
 
 A fast static job runs first, without `terraform init` or provider downloads:
@@ -23,17 +51,10 @@ terraform fmt -check -recursive .
 tflint --recursive
 ```
 
-A separate, slower job then actually runs `examples/local-file`: `terraform init`,
-`apply`, checks `greeting.txt` was created with the expected content, then `destroy` —
-catching anything the static checks can't (a provider version that no longer resolves, a
-resource attribute renamed upstream).
-
-```bash
-cd examples/local-file
-terraform init && terraform apply -auto-approve
-grep -q 'hello from the cookbook' greeting.txt
-terraform destroy -auto-approve
-```
+A separate, slower job then actually runs the Quickstart above end to end — `init`,
+`apply`, checks `greeting.txt` has the expected content, then `destroy` — catching
+anything the static checks can't (a provider version that no longer resolves, a resource
+attribute renamed upstream).
 
 Examples must be formatted and free of `tflint` warnings. Prefer providers that need no
 cloud credentials (`local`, `random`, `null`, `tls`) so examples stay runnable anywhere.
