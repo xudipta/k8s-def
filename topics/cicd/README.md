@@ -11,6 +11,8 @@ For git itself and GitHub-the-platform (the `gh` CLI, PRs, repo configuration), 
   permissions, walking through `examples/workflows/reusable-lint.yml`, security basics.
 - `notes/02-workflow-patterns.md` — path filtering, dependency caching, matrix builds,
   reusable workflows vs. composite actions.
+- `notes/03-deployment-strategies.md` — rolling, blue-green, and canary deployments,
+  environment promotion, and a GitOps overview (with diagrams).
 - `examples/workflows/` — example workflow files.
 
 New here? Start with `notes/01-github-actions-basics.md` and read it alongside

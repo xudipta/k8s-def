@@ -1,0 +1,6 @@
+[sqlfluff]
+dialect = postgres
+max_line_length = 100
+
+# "name"/"status" etc. as column identifiers are common and fine; don't flag them.
+exclude_rules = RF04

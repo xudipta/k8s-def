@@ -1,0 +1,17 @@
+---
+groups:
+  - name: sample-recording-rules
+    rules:
+      - record: job:http_requests:rate5m
+        expr: sum(rate(http_requests_total[5m])) by (job)
+
+  - name: sample-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: job:http_requests:rate5m{job="sample-app"} > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request rate on {{ $labels.job }}"
+          description: "sample-app request rate has been above 100/s for 5 minutes."

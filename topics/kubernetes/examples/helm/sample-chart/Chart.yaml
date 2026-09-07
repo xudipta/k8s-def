@@ -1,0 +1,9 @@
+---
+apiVersion: v2
+name: sample-chart
+description: >-
+  A minimal chart mirroring examples/deployment/sample-deployment.yaml,
+  parameterized for the Helm walkthrough in notes/06-helm-and-kustomize.md.
+type: application
+version: 0.1.0
+appVersion: "1.27"

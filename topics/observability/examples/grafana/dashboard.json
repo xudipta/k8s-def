@@ -1,0 +1,34 @@
+{
+  "title": "Sample App Overview",
+  "uid": "sample-app-overview",
+  "schemaVersion": 39,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request rate",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "job:http_requests:rate5m", "refId": "A" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "High error rate alerts (firing)",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        { "expr": "ALERTS{alertname=\"HighErrorRate\", alertstate=\"firing\"}", "refId": "A" }
+      ]
+    }
+  ]
+}
