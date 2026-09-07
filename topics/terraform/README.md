@@ -16,11 +16,23 @@ alongside it.
 
 ## Validation
 
-CI runs, without `terraform init` or provider downloads:
+A fast static job runs first, without `terraform init` or provider downloads:
 
 ```bash
 terraform fmt -check -recursive .
 tflint --recursive
+```
+
+A separate, slower job then actually runs `examples/local-file`: `terraform init`,
+`apply`, checks `greeting.txt` was created with the expected content, then `destroy` —
+catching anything the static checks can't (a provider version that no longer resolves, a
+resource attribute renamed upstream).
+
+```bash
+cd examples/local-file
+terraform init && terraform apply -auto-approve
+grep -q 'hello from the cookbook' greeting.txt
+terraform destroy -auto-approve
 ```
 
 Examples must be formatted and free of `tflint` warnings. Prefer providers that need no

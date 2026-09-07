@@ -24,6 +24,8 @@ jobs:
       cicd: ${{ steps.filter.outputs.cicd }}
       skills: ${{ steps.filter.outputs.skills }}
       mcp: ${{ steps.filter.outputs.mcp }}
+      observability: ${{ steps.filter.outputs.observability }}
+      database: ${{ steps.filter.outputs.database }}
       docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +54,10 @@ jobs:
               - 'scripts/check_skill.py'
             mcp:
               - 'topics/mcp/**'
+            observability:
+              - 'topics/observability/**'
+            database:
+              - 'topics/database/**'
             docs:
               - '**/*.md'
               - 'mkdocs.yml'
@@ -93,11 +99,27 @@ jobs:
             https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
           tar xf kubeconform.tar.gz kubeconform
           sudo install kubeconform /usr/local/bin/
-      - name: Schema-validate manifests
+      - name: Schema-validate plain manifests
         run: |
           kubeconform -summary -strict -verbose \
             -schema-location default \
+            -ignore-filename-pattern '.*/examples/helm/.*' \
+            -ignore-filename-pattern '.*/kustomization\.yaml$' \
             topics/kubernetes/examples/
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.15.4
+      - name: helm lint + schema-validate the rendered chart
+        run: |
+          helm lint topics/kubernetes/examples/helm/sample-chart
+          helm template test-release topics/kubernetes/examples/helm/sample-chart \
+            | kubeconform -summary -strict -schema-location default
+      - name: kubectl kustomize + schema-validate each overlay
+        run: |
+          for overlay in topics/kubernetes/examples/kustomize/overlays/*/; do
+            echo "== $overlay =="
+            kubectl kustomize "$overlay" | kubeconform -summary -strict -schema-location default
+          done
 
   k8s-kind:
     needs: changes
@@ -173,6 +195,27 @@ jobs:
           recursive: true
           dockerfile: 'topics/docker/**/Dockerfile*'
 
+  docker-smoke:
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t hello-nginx topics/docker/examples/hello-nginx
+      - name: Run and wait for readiness
+        run: |
+          docker run -d --name hello-nginx -p 8080:80 hello-nginx
+          timeout 30 sh -c 'until curl -sf http://localhost:8080 >/dev/null; do sleep 1; done'
+      - name: Verify response content
+        run: curl -sf http://localhost:8080 | grep -q 'hello from the cookbook'
+      - name: Debug on failure
+        if: failure()
+        run: docker logs hello-nginx || true
+      - name: Clean up
+        if: always()
+        run: docker rm -f hello-nginx || true
+
   shell-lint:
     needs: changes
     if: needs.changes.outputs.shell == 'true'
@@ -204,6 +247,30 @@ jobs:
       - name: tflint
         working-directory: topics/terraform
         run: tflint --recursive
+
+  terraform-apply:
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: terraform init + apply
+        working-directory: topics/terraform/examples/local-file
+        run: |
+          terraform init
+          terraform apply -auto-approve
+      - name: Verify output file
+        working-directory: topics/terraform/examples/local-file
+        run: |
+          test -f greeting.txt
+          grep -q 'hello from the cookbook' greeting.txt
+      - name: terraform destroy
+        if: always()
+        working-directory: topics/terraform/examples/local-file
+        run: terraform destroy -auto-approve
 
   actionlint:
     needs: changes
@@ -252,6 +319,83 @@ jobs:
             echo "checking $f"
             jq empty "$f"
           done
+
+  observability-validate:
+    needs: changes
+    if: needs.changes.outputs.observability == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install promtool
+        run: |
+          curl -sSLo prometheus.tar.gz \
+            https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz
+          tar xf prometheus.tar.gz prometheus-2.54.1.linux-amd64/promtool
+          sudo install prometheus-2.54.1.linux-amd64/promtool /usr/local/bin/
+      - name: promtool check config + rules
+        run: |
+          promtool check config topics/observability/examples/prometheus/prometheus.yml
+          promtool check rules topics/observability/examples/prometheus/rules.yml
+      - name: Validate Grafana dashboard JSON
+        run: jq empty topics/observability/examples/grafana/dashboard.json
+
+  database-validate:
+    needs: changes
+    if: needs.changes.outputs.database == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install sqlfluff
+      - name: sqlfluff lint
+        run: sqlfluff lint topics/database/examples/
+
+  database-migrate:
+    needs: changes
+    if: needs.changes.outputs.database == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply schema.sql directly
+        run: psql -v ON_ERROR_STOP=1 -f topics/database/examples/schema/schema.sql
+      - name: Reset database
+        run: psql -c 'DROP TABLE IF EXISTS order_items, orders, products, users CASCADE;'
+      - name: Apply migrations up, in order
+        run: |
+          mapfile -t files < <(find topics/database/examples/migrations -name '*.up.sql' | sort)
+          for f in "${files[@]}"; do
+            echo "== $f =="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Verify tables exist
+        run: psql -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | grep -q '^4$'
+      - name: Roll back migrations down, in reverse order
+        run: |
+          mapfile -t files < <(find topics/database/examples/migrations -name '*.down.sql' | sort -r)
+          for f in "${files[@]}"; do
+            echo "== $f =="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Verify tables are gone
+        run: psql -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | grep -q '^0$'
 
   docs-build:
     needs: changes

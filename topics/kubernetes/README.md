@@ -16,12 +16,16 @@ Notes and example manifests for core Kubernetes objects and `kubectl` usage.
   DNS, walking through `examples/services/sample-service.yaml`; Ingress, briefly.
 - `notes/05-security-context.md` — Pod- vs. container-level `securityContext`, the fields
   that matter, walking through the `*-with-security-context.yaml` examples.
+- `notes/06-helm-and-kustomize.md` — templating + release tracking vs. patch overlays,
+  walking through `examples/helm/` and `examples/kustomize/` (with diagrams).
 - `examples/pod/` — Pod definitions.
 - `examples/deployment/` — Deployment definitions.
 - `examples/replicaset/` — ReplicaSet definitions.
 - `examples/services/` — Service definitions.
 - `examples/configs/` — ConfigMap definitions.
 - `examples/secrets/` — Secret definitions.
+- `examples/helm/sample-chart/` — a minimal Helm chart.
+- `examples/kustomize/` — a `base/` with `dev`/`prod` overlays.
 
 New here? Start with `notes/01-kubectl-commands.md`, then `notes/02-pods-and-workloads.md`
 alongside `examples/pod/sample-pod.yaml`.
@@ -54,6 +58,9 @@ See `notes/03-config-and-secrets.md`, `examples/pod/pod-with-configmap-secret.ya
 ## Validation
 
 - `yamllint` runs on every `*.yaml` change.
-- `kubeconform` schema-validates every manifest under `examples/`.
+- `kubeconform` schema-validates every manifest under `examples/`, including the
+  Deployment/Service rendered from `examples/helm/sample-chart` (`helm template`) and
+  from each `examples/kustomize/overlays/*` (`kubectl kustomize`).
+- `helm lint` checks `examples/helm/sample-chart`.
 - A `kind` cluster applies `secrets/`, `configs/`, `deployment/`, `services/`, waits for
   the Deployment to become available, and curls the Service to confirm nginx responds.
