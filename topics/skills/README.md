@@ -3,6 +3,22 @@
 Notes and examples for **Agent Skills** — folders of instructions (and optional scripts /
 resources) that an AI agent loads on demand to do a specific kind of task well.
 
+## How a skill gets used
+
+```mermaid
+flowchart LR
+    Prompt["user request"] --> Agent["agent"]
+    Skills[("every installed skill's\nname + description")] -->|scanned first| Agent
+    Agent -->|one description matches| Skill["that skill's SKILL.md\n+ bundled files/scripts"]
+    Skill -->|loaded into context| Agent
+    Agent -->|follows the instructions,\nmaybe runs a bundled script| Result["result"]
+```
+
+Only names and descriptions are scanned up front — cheap, so having many installed
+skills costs little. A skill's full body (and any bundled script) loads only once the
+agent decides it's actually relevant, which is why the `description` field is what
+authoring a skill is really about getting right (see `02-authoring-skills.md`).
+
 ## Contents
 
 - `notes/01-what-are-agent-skills.md` — the concept and when to reach for one.
@@ -10,6 +26,19 @@ resources) that an AI agent loads on demand to do a specific kind of task well.
 - `notes/03-skills-in-claude-code.md` — how Claude Code discovers, gates, and invokes skills.
 - `examples/pdf-summary/` — a minimal skill (instructions only).
 - `examples/release-notes/` — a skill that bundles a helper script.
+
+New here? Start with `notes/01-what-are-agent-skills.md`, then read
+`examples/pdf-summary/SKILL.md` — it's short enough to read in one pass.
+
+## Quickstart
+
+```bash
+python scripts/check_skill.py topics/skills/examples/pdf-summary/SKILL.md
+# ok   topics/skills/examples/pdf-summary/SKILL.md
+```
+
+That's the same check CI runs on every `SKILL.md` — a useful sanity check to run on any
+new skill you author, before installing it anywhere.
 
 ## Validation
 

@@ -7,6 +7,22 @@ Pairs naturally with [`topics/kubernetes/`](../kubernetes/README.md) (most clust
 Prometheus + Grafana stack) but isn't specific to it — the configs here are plain
 Prometheus/Grafana, runnable anywhere either is deployed.
 
+## How the pieces fit
+
+```mermaid
+flowchart LR
+    App["your app\n/metrics endpoint"] -->|scraped every 15s| Prom["Prometheus"]
+    Prom --> TSDB[("time-series storage")]
+    Prom -->|alerting rule fires| AM["Alertmanager"]
+    AM --> Notify["Slack / PagerDuty / email"]
+    Grafana["Grafana"] -->|PromQL query| Prom
+    Grafana --> Dash["dashboard"]
+```
+
+Prometheus does two jobs at once: it's both the thing storing your metrics *and* the
+thing evaluating alerting rules against them — Grafana and Alertmanager are separate
+processes that sit on top, for visualization and notification respectively.
+
 ## Contents
 
 - `notes/01-prometheus-basics.md` — pull-based scraping, the four metric types, enough
@@ -24,15 +40,24 @@ Prometheus/Grafana, runnable anywhere either is deployed.
 New here? Start with `notes/01-prometheus-basics.md` alongside
 `examples/prometheus/prometheus.yml`.
 
-## Validation
+## Quickstart
 
-- `yamllint` covers the Prometheus configs.
-- `promtool check config` validates `examples/prometheus/prometheus.yml` (including that
-  `rule_files` resolve); `promtool check rules` validates `examples/prometheus/rules.yml`.
-- `jq` syntax-checks `examples/grafana/dashboard.json`.
+No live Prometheus needed to check a config is sound — `promtool` parses and validates
+it the same way the real server would on startup:
 
 ```bash
 promtool check config topics/observability/examples/prometheus/prometheus.yml
+# Checking .../prometheus.yml
+#   SUCCESS: 1 rule files found
+#  SUCCESS: .../prometheus.yml is valid prometheus config file syntax
+
 promtool check rules topics/observability/examples/prometheus/rules.yml
-jq empty topics/observability/examples/grafana/dashboard.json
+# Checking .../rules.yml
+#   SUCCESS: 2 rules found
 ```
+
+## Validation
+
+- `yamllint` covers the Prometheus configs.
+- `promtool check config`/`check rules` (the exact commands above) run in CI.
+- `jq` syntax-checks `examples/grafana/dashboard.json`.

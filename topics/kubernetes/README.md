@@ -2,6 +2,26 @@
 
 Notes and example manifests for core Kubernetes objects and `kubectl` usage.
 
+## What Kubernetes actually does
+
+```mermaid
+flowchart LR
+    Dep["Deployment\n(desired state, rollouts)"] -->|manages| RS["ReplicaSet"]
+    RS -->|keeps N running| Pod1["Pod"]
+    RS -->|keeps N running| Pod2["Pod"]
+    RS -->|keeps N running| Pod3["Pod"]
+    Svc["Service\n(stable network identity)"] --> Pod1
+    Svc --> Pod2
+    Svc --> Pod3
+    CM["ConfigMap / Secret"] -.->|injects config into| Pod1
+    Client["Client traffic"] --> Svc
+```
+
+You declare what you want (a Deployment, N replicas of a container); Kubernetes
+continuously reconciles the real cluster to match — recreating a Pod that dies, routing
+traffic to whichever Pods are actually healthy via a Service, without you scripting any
+of that yourself.
+
 ## Contents
 
 - `notes/01-kubectl-commands.md` — create/apply/edit/extract, inspecting and debugging
@@ -30,30 +50,25 @@ Notes and example manifests for core Kubernetes objects and `kubectl` usage.
 New here? Start with `notes/01-kubectl-commands.md`, then `notes/02-pods-and-workloads.md`
 alongside `examples/pod/sample-pod.yaml`.
 
-## Usage
+## Quickstart
+
+Needs any cluster — `kind create cluster` for a disposable local one (exactly what this
+repo's own CI uses):
 
 ```bash
-kubectl apply -f examples/pod/sample-pod.yaml
-kubectl apply -f examples/deployment/deployment-with-configmap-secret.yaml
-kubectl apply -f examples/pod/pod-with-security-context.yaml
-kubectl apply -f examples/deployment/deployment-with-security-context.yaml
+kubectl apply -f examples/secrets/sample-secret.yaml
+kubectl apply -f examples/configs/sample-configmap.yaml
+kubectl apply -f examples/deployment/sample-deployment.yaml
+kubectl apply -f examples/services/sample-service.yaml
+
+kubectl get pods                     # should show 2 Running nginx pods
+kubectl run curl --rm -i --restart=Never --image=curlimages/curl:latest -- \
+  curl -s sample-service | grep 'Welcome to nginx'
 ```
 
-## SecurityContext
-
-`securityContext` works at two levels:
-
-- **Pod-level** (`spec.securityContext`) — applies to all containers in the Pod.
-- **Container-level** (`spec.containers[].securityContext`) — applies to that container only.
-
-See `notes/05-security-context.md`, `examples/pod/pod-with-security-context.yaml`, and
-`examples/deployment/deployment-with-security-context.yaml`.
-
-## ConfigMaps and Secrets
-
-ConfigMaps and Secrets can be injected as environment variables or mounted as volumes.
-See `notes/03-config-and-secrets.md`, `examples/pod/pod-with-configmap-secret.yaml`, and
-`examples/deployment/deployment-with-configmap-secret.yaml`.
+Then poke at it — `kubectl scale deployment/sample-deployment --replicas=1` and watch
+`kubectl get endpoints sample-service` shrink to match, or `kubectl delete pod` one of the
+two and watch the ReplicaSet replace it.
 
 ## Validation
 
@@ -63,4 +78,5 @@ See `notes/03-config-and-secrets.md`, `examples/pod/pod-with-configmap-secret.ya
   from each `examples/kustomize/overlays/*` (`kubectl kustomize`).
 - `helm lint` checks `examples/helm/sample-chart`.
 - A `kind` cluster applies `secrets/`, `configs/`, `deployment/`, `services/`, waits for
-  the Deployment to become available, and curls the Service to confirm nginx responds.
+  the Deployment to become available, and curls the Service to confirm nginx responds —
+  the exact sequence in the Quickstart above.
