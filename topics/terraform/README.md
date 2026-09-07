@@ -4,8 +4,15 @@ Infrastructure-as-code notes and self-contained examples.
 
 ## Contents
 
-- `notes/` — prose notes (state, modules, workspaces, provider auth).
+- `notes/01-core-workflow.md` — `init`/`plan`/`apply`/`destroy`, reading a plan, how state
+  tracks resources, walking through `examples/local-file`.
+- `notes/02-variables-and-modules.md` — setting variables, outputs, extracting a module.
+- `notes/03-state-and-workspaces.md` — remote backends, state locking, workspaces vs.
+  per-environment directories.
 - `examples/local-file/` — a credential-free example using the `hashicorp/local` provider.
+
+New to Terraform? Start with `notes/01-core-workflow.md` and run `examples/local-file`
+alongside it.
 
 ## Validation
 

@@ -63,16 +63,24 @@ nav:
       - kubectl commands: topics/kubernetes/notes/kubectl-commands.md
   - Docker:
       - Overview: topics/docker/README.md
-      - Getting started: topics/docker/notes/00-getting-started.md
+      - Images and Dockerfiles: topics/docker/notes/01-images-and-dockerfiles.md
+      - Multi-stage builds and caching: topics/docker/notes/02-multi-stage-builds-and-caching.md
+      - Compose and networking: topics/docker/notes/03-compose-and-networking.md
   - Linux:
       - Overview: topics/linux/README.md
-      - Getting started: topics/linux/notes/00-getting-started.md
+      - Shell fundamentals: topics/linux/notes/01-shell-fundamentals.md
+      - Text processing: topics/linux/notes/02-text-processing.md
+      - systemd and networking: topics/linux/notes/03-systemd-and-networking.md
   - Terraform:
       - Overview: topics/terraform/README.md
-      - Getting started: topics/terraform/notes/00-getting-started.md
+      - Core workflow: topics/terraform/notes/01-core-workflow.md
+      - Variables and modules: topics/terraform/notes/02-variables-and-modules.md
+      - State and workspaces: topics/terraform/notes/03-state-and-workspaces.md
   - CI/CD:
       - Overview: topics/cicd/README.md
-      - Getting started: topics/cicd/notes/00-getting-started.md
+      - GitHub Actions basics: topics/cicd/notes/01-github-actions-basics.md
+      - Workflow patterns: topics/cicd/notes/02-workflow-patterns.md
+      - Git workflow: topics/cicd/notes/03-git-workflow.md
   - Agent Skills:
       - Overview: topics/skills/README.md
       - What are Agent Skills: topics/skills/notes/01-what-are-agent-skills.md
