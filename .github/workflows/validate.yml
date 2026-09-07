@@ -195,6 +195,27 @@ jobs:
           recursive: true
           dockerfile: 'topics/docker/**/Dockerfile*'
 
+  docker-smoke:
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t hello-nginx topics/docker/examples/hello-nginx
+      - name: Run and wait for readiness
+        run: |
+          docker run -d --name hello-nginx -p 8080:80 hello-nginx
+          timeout 30 sh -c 'until curl -sf http://localhost:8080 >/dev/null; do sleep 1; done'
+      - name: Verify response content
+        run: curl -sf http://localhost:8080 | grep -q 'hello from the cookbook'
+      - name: Debug on failure
+        if: failure()
+        run: docker logs hello-nginx || true
+      - name: Clean up
+        if: always()
+        run: docker rm -f hello-nginx || true
+
   shell-lint:
     needs: changes
     if: needs.changes.outputs.shell == 'true'
@@ -226,6 +247,30 @@ jobs:
       - name: tflint
         working-directory: topics/terraform
         run: tflint --recursive
+
+  terraform-apply:
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: terraform init + apply
+        working-directory: topics/terraform/examples/local-file
+        run: |
+          terraform init
+          terraform apply -auto-approve
+      - name: Verify output file
+        working-directory: topics/terraform/examples/local-file
+        run: |
+          test -f greeting.txt
+          grep -q 'hello from the cookbook' greeting.txt
+      - name: terraform destroy
+        if: always()
+        working-directory: topics/terraform/examples/local-file
+        run: terraform destroy -auto-approve
 
   actionlint:
     needs: changes
@@ -306,6 +351,51 @@ jobs:
       - run: pip install sqlfluff
       - name: sqlfluff lint
         run: sqlfluff lint topics/database/examples/
+
+  database-migrate:
+    needs: changes
+    if: needs.changes.outputs.database == 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply schema.sql directly
+        run: psql -v ON_ERROR_STOP=1 -f topics/database/examples/schema/schema.sql
+      - name: Reset database
+        run: psql -c 'DROP TABLE IF EXISTS order_items, orders, products, users CASCADE;'
+      - name: Apply migrations up, in order
+        run: |
+          mapfile -t files < <(find topics/database/examples/migrations -name '*.up.sql' | sort)
+          for f in "${files[@]}"; do
+            echo "== $f =="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Verify tables exist
+        run: psql -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | grep -q '^4$'
+      - name: Roll back migrations down, in reverse order
+        run: |
+          mapfile -t files < <(find topics/database/examples/migrations -name '*.down.sql' | sort -r)
+          for f in "${files[@]}"; do
+            echo "== $f =="
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Verify tables are gone
+        run: psql -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" | grep -q '^0$'
 
   docs-build:
     needs: changes

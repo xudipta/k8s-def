@@ -17,8 +17,15 @@ New to Docker? Start with `notes/01-images-and-dockerfiles.md` and build/run
 
 ## Validation
 
-`hadolint` lints every `Dockerfile*` under this topic on change.
+- `hadolint` lints every `Dockerfile*` under this topic on change.
+- A live smoke test builds `hello-nginx`, runs it, and curls it to confirm the response
+  actually contains the expected content — not just that the Dockerfile is well-formed.
 
 ```bash
 docker run --rm -i hadolint/hadolint < examples/hello-nginx/Dockerfile
+
+docker build -t hello-nginx examples/hello-nginx
+docker run -d --name hello-nginx -p 8080:80 hello-nginx
+curl -sf http://localhost:8080 | grep -q 'hello from the cookbook'
+docker rm -f hello-nginx
 ```

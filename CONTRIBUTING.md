@@ -43,8 +43,10 @@ Terraform examples use the `local`/`random`/`null` providers, not real clouds).
 | kubernetes | helm lint | `helm lint topics/kubernetes/examples/helm/sample-chart` |
 | kubernetes | kubectl kustomize | `kubectl kustomize topics/kubernetes/examples/kustomize/overlays/dev` |
 | docker | hadolint | `docker run --rm -i hadolint/hadolint < path/to/Dockerfile` |
+| docker | live smoke test | see `validate.yml` `docker-smoke` job (build, run, curl) |
 | linux | shellcheck | `shellcheck topics/linux/examples/scripts/*.sh` |
 | terraform | terraform / tflint | `terraform fmt -check -recursive topics/terraform && tflint --recursive` |
+| terraform | live apply | see `validate.yml` `terraform-apply` job (`init`/`apply`/`destroy`) |
 | cicd | actionlint | `actionlint topics/cicd/examples/workflows/*.yml` |
 | github | shellcheck / yamllint | `shellcheck topics/github/examples/scripts/*.sh && yamllint topics/github/examples/ISSUE_TEMPLATE/*.yml` |
 | skills | check_skill.py | `python scripts/check_skill.py topics/skills/examples/*/SKILL.md` |
@@ -52,6 +54,7 @@ Terraform examples use the `local`/`random`/`null` providers, not real clouds).
 | observability | promtool | `promtool check config topics/observability/examples/prometheus/prometheus.yml && promtool check rules topics/observability/examples/prometheus/rules.yml` |
 | observability | jq | `jq empty topics/observability/examples/grafana/dashboard.json` |
 | database | sqlfluff | `sqlfluff lint topics/database/examples/` |
+| database | live migrate | see `validate.yml` `database-migrate` job (migrate up/down against a real Postgres service container) |
 
 ## Commit / PR
 
